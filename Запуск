@@ -1,0 +1,4 @@
+git clone https://github.com/4Cosmopolit/hunter6-options.git
+cd hunter6-options
+cp .env.example .env   # заполнить ключи Bybit Testnet
+docker-compose up --build -d
