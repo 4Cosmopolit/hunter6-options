@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "title": "Hunter 6.0 Options Dashboard",
+    "panels": [
+      {
+        "title": "Option Delta",
+        "targets": [{ "expr": "option_total_delta", "legendFormat": "Delta" }],
+        "type": "timeseries"
+      },
+      {
+        "title": "Volatility Skew",
+        "targets": [{ "expr": "volatility_skew", "legendFormat": "Skew" }],
+        "type": "timeseries"
+      },
+      {
+        "title": "Anomalies (last 1h)",
+        "targets": [{ "expr": "increase(option_anomalies_total[1h])", "legendFormat": "Anomalies" }],
+        "type": "stat"
+      },
+      {
+        "title": "Strangle Orders",
+        "targets": [{ "expr": "increase(orders_placed_total{type='strangle'}[1h])", "legendFormat": "Orders" }],
+        "type": "stat"
+      }
+    ]
+  }
+}
