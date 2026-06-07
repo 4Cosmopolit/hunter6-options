@@ -1,6 +1,7 @@
 global:
   scrape_interval: 5s
+
 scrape_configs:
   - job_name: 'hunter_agents'
     static_configs:
-      - targets: ['detector:8000', 'executor:8000', 'hedger:8000']
+      - targets: ['detector:8000', 'executor:8001', 'hedger:8002']
