@@ -5,9 +5,12 @@ import hmac
 import hashlib
 import aiohttp
 from kafka import KafkaConsumer
-from prometheus_client import Counter
+from prometheus_client import Counter, start_http_server
 import os
 import logging
+
+# Запуск HTTP-сервера для Prometheus
+start_http_server(8001)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("executor")
@@ -20,7 +23,6 @@ API_SECRET = os.getenv("BYBIT_API_SECRET")
 TESTNET = os.getenv("TESTNET", "true").lower() == "true"
 BASE_URL = "https://api-testnet.bybit.com" if TESTNET else "https://api.bybit.com"
 
-# Исправленная функция подписи: теперь принимает api_key первым аргументом
 def sign_request(api_key, api_secret, timestamp, method, path, body):
     body_str = json.dumps(body) if body else ''
     recv_window = "10000"
@@ -28,10 +30,6 @@ def sign_request(api_key, api_secret, timestamp, method, path, body):
     return hmac.new(api_secret.encode(), sign_str.encode(), hashlib.sha256).hexdigest()
 
 async def get_option_price(symbol, expiry, strike, opt_type):
-    """
-    Получение цены опциона через Bybit V5 API.
-    Возвращает среднюю между лучшей заявкой на покупку и продажу.
-    """
     ticker_symbol = f"{symbol}-{expiry}-{strike}-{opt_type}"
     url = f"{BASE_URL}/v5/market/tickers?category=option&symbol={ticker_symbol}"
     try:
@@ -57,8 +55,6 @@ async def get_option_price(symbol, expiry, strike, opt_type):
         return None
 
 async def place_strangle(symbol, expiry, put_strike, call_strike, size_usdt):
-    """Выставляет Long Strangle через Position Builder Bybit."""
-    # Получаем реальные цены опционов
     put_price = await get_option_price(symbol, expiry, put_strike, "P")
     call_price = await get_option_price(symbol, expiry, call_strike, "C")
     
@@ -75,7 +71,6 @@ async def place_strangle(symbol, expiry, put_strike, call_strike, size_usdt):
     ]
     payload = {"category": "option", "legs": legs, "orderLinkId": f"strangle_{int(time.time())}", "timeInForce": "GTC"}
     timestamp = int(time.time() * 1000)
-    # Исправленный вызов sign_request с передачей API_KEY
     signature = sign_request(API_KEY, API_SECRET, timestamp, "POST", "/v5/order/create-batch", payload)
     headers = {"X-BAPI-API-KEY": API_KEY, "X-BAPI-TIMESTAMP": str(timestamp), "X-BAPI-SIGN": signature, "Content-Type": "application/json"}
     
