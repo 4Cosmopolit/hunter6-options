@@ -1,0 +1,64 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+
+  detector:
+    build: .
+    depends_on: [kafka]
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - TESTNET=${TESTNET:-true}
+    command: python -m src.detector
+    restart: unless-stopped
+
+  executor:
+    build: .
+    depends_on: [kafka]
+    environment:
+      - BYBIT_API_KEY=${BYBIT_API_KEY}
+      - BYBIT_API_SECRET=${BYBIT_API_SECRET}
+      - TESTNET=${TESTNET:-true}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    command: python -m src.executor
+    restart: unless-stopped
+
+  hedger:
+    build: .
+    depends_on: [kafka]
+    environment:
+      - BYBIT_API_KEY=${BYBIT_API_KEY}
+      - BYBIT_API_SECRET=${BYBIT_API_SECRET}
+      - TESTNET=${TESTNET:-true}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    command: python -m src.hedger
+    restart: unless-stopped
