@@ -1,16 +1,20 @@
+import asyncio
+import json
 import numpy as np
 from collections import deque
 from sklearn.ensemble import IsolationForest
-from prometheus_client import Counter, Gauge
-import asyncio
-import json
 from kafka import KafkaConsumer, KafkaProducer
-import os
+from prometheus_client import Counter, Gauge, start_http_server
 import logging
+import os
+
+# Запуск HTTP-сервера для Prometheus
+start_http_server(8000)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("detector")
 
+KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 anomaly_counter = Counter('option_anomalies_total', 'Total anomalies detected', ['type'])
 skew_gauge = Gauge('volatility_skew', 'Current volatility skew (put - call)')
 
