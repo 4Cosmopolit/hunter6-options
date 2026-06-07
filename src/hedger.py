@@ -1,8 +1,11 @@
 import asyncio
 from pybit.unified_trading import WebSocket, HTTP
-from prometheus_client import Gauge, Counter
+from prometheus_client import Gauge, Counter, start_http_server
 import os
 import logging
+
+# Запуск HTTP-сервера для Prometheus
+start_http_server(8002)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("hedger")
@@ -29,12 +32,10 @@ class DeltaHedger:
         """
         try:
             if 'data' in message:
-                # Позиции могут быть в списке или одиночным объектом
                 positions = message['data'] if isinstance(message['data'], list) else [message['data']]
                 delta_sum = 0.0
                 for pos in positions:
                     if pos.get('category') == 'option':
-                        # delta может приходить как строка
                         delta_val = float(pos.get('delta', 0.0))
                         delta_sum += delta_val
                 async with self._lock:
