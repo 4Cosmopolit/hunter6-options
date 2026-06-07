@@ -1,0 +1,8 @@
+mkdir hunter6-options && cd hunter6-options
+# Создайте все файлы выше в соответствующих директориях
+git init
+git add .
+git commit -m "Initial commit: Hunter 6.0 — Autonomous Options Trading System"
+git remote add origin https://github.com/YOUR_USERNAME/hunter6-options.git
+git branch -M main
+git push -u origin main
