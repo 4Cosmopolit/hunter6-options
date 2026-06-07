@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.env
+venv/
+.idea/
+*.log
+models/
+new_data/
+grafana_data/
+prometheus_data/
