@@ -154,3 +154,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+docker-compose up --build -d executor
