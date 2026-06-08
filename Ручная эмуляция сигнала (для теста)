@@ -1,0 +1,3 @@
+docker exec -it hunter6_options_kafka_1 bash
+kafka-console-producer --broker-list localhost:9092 --topic option_signals
+# вставьте JSON: {"type":"PUT_SKEW","expiry":"2025-01-31","skew_value":0.15,"timestamp":1735689600}
