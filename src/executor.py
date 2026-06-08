@@ -93,7 +93,7 @@ async def main():
     logger.info("Executor waiting for signals...")
     for msg in consumer:
         signal = msg.value
-        if signal.get('type') == 'PUT_SKEW':
+        if signal.get('type') in ('PUT_SKEW', 'CALL_SKEW'):  # обрабатываем оба типа сигналов
             await place_strangle('BTC', signal['expiry'], 60000, 70000, 1000)
 
 if __name__ == "__main__":
